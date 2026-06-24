@@ -3,6 +3,7 @@
 # ============================================================
 #  BYPASS PRO - Ativação via GitHub
 # ============================================================
+Import-Module NetSecurity -ErrorAction SilentlyContinue
 $script:GITHUB_TOKEN = "SEU_GITHUB_TOKEN_AQUI"
 $script:GITHUB_OWNER = "mira2022004-sketch"
 $script:GITHUB_REPO = "bypass-pro"
@@ -170,20 +171,17 @@ function Show-ActivationScreen {
 
 # --- Menu principal ---
 function Show-MainMenu {
-    $steamPath = "C:\Program Files (x86)\Steam\steam.exe"
-    try {
-        $reg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop
-        $steamPath = $reg.SteamExe
-    } catch {}
+    $steamPath = Get-SteamPath
+    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-    $n = "$env:windir\system32\netsh.exe"
     cls
-    $ruleExists = $null -ne (& $n advfirewall firewall show rule name="$script:RULE_NAME" 2>$null)
+    $ruleExists = $null -ne (Get-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction SilentlyContinue)
 
     Write-Host "===================================================" -ForegroundColor White
     Write-Host "               RECONNECT BYPASS PRO                 " -ForegroundColor White
     Write-Host "===================================================" -ForegroundColor White
     Write-Host " Steam: $steamPath" -ForegroundColor Gray
+    if (-not $isAdmin) { Write-Host " [!] NAO ESTA COMO ADMIN" -ForegroundColor Red }
     Write-Host "===================================================" -ForegroundColor White
     Write-Host ""
 
@@ -210,29 +208,32 @@ function Show-MainMenu {
     return $true
 }
 
+function Get-SteamPath {
+    $p = "C:\Program Files (x86)\Steam\steam.exe"
+    try { $p = (Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop).SteamExe } catch {}
+    return $p
+}
+
 function Invoke-Block {
-    $n = "$env:windir\system32\netsh.exe"
-    $steamPath = "C:\Program Files (x86)\Steam\steam.exe"
-    try { $reg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop; $steamPath = $reg.SteamExe } catch {}
-    & $n advfirewall firewall delete rule name="$script:RULE_NAME" | Out-Null
-    & $n advfirewall firewall add rule name="$script:RULE_NAME" dir=out action=block program="$steamPath" enable=yes | Out-Null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "STEAM BLOQUEADO com sucesso!" -ForegroundColor Green
-    } else {
-        Write-Host "Falha ao bloquear. Execute como Administrador." -ForegroundColor Red
+    $steamPath = Get-SteamPath
+    try {
+        Remove-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction SilentlyContinue
+        New-NetFirewallRule -DisplayName "$script:RULE_NAME" -Direction Outbound -Action Block -Program "$steamPath" -Enabled True -ErrorAction Stop | Out-Null
+        Write-Host "STEAM BLOQUEADO!" -ForegroundColor Green
+    } catch {
+        Write-Host "FALHA ao bloquear: $_" -ForegroundColor Red
     }
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 2
 }
 
 function Invoke-Unblock {
-    $n = "$env:windir\system32\netsh.exe"
-    & $n advfirewall firewall delete rule name="$script:RULE_NAME" | Out-Null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "STEAM LIBERADO com sucesso!" -ForegroundColor Green
-    } else {
-        Write-Host "Falha ao liberar. Execute como Administrador." -ForegroundColor Red
+    try {
+        Remove-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction Stop
+        Write-Host "STEAM LIBERADO!" -ForegroundColor Green
+    } catch {
+        Write-Host "FALHA ao liberar (pode ja estar liberado)." -ForegroundColor Yellow
     }
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 2
 }
 
 # ===================== MAIN =====================
