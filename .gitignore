@@ -1,0 +1,3 @@
+server/node_modules/
+server/keys.db
+client/activation.dat
