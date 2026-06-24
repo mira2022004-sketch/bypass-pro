@@ -209,12 +209,11 @@ function Show-MainMenu {
 }
 
 function Get-SteamPath {
-    $default = Join-Path ${env:ProgramFiles(x86)} "Steam\steam.exe"
-    if (-not (Test-Path $default)) { $default = "C:\Program Files (x86)\Steam\steam.exe" }
+    $default = "C:\Program Files (x86)\Steam\steam.exe"
     $p = $default
     try {
         $raw = (Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop).SteamExe
-        $raw = $raw -replace '"','' -replace "'",''
+        $raw = $raw -replace '"','' -replace "'",'' -replace '/','\'
         if ($raw -and (Test-Path $raw)) { $p = $raw }
     } catch {}
     return $p
