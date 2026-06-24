@@ -1,26 +1,26 @@
 {
-    "DW2EC-ZH36J-OESDU-DT3HA":  {
-                                    "created":  "2026-06-24",
-                                    "expires":  "2026-07-24",
-                                    "days":  30,
-                                    "hardware":  "1743777675B5D4D5779BD4BF1ED1DBCA",
-                                    "revoked":  false,
-                                    "notes":  ""
-                                },
-    "ASLK3-9PW99-WIPKB-HNLDR":  {
-                                    "created":  "2026-06-24",
-                                    "expires":  "2026-07-24",
-                                    "days":  30,
-                                    "hardware":  null,
-                                    "revoked":  false,
-                                    "notes":  ""
-                                },
-    "517QA-92057-Q2IJ4-PDIHY":  {
-                                    "created":  "2026-06-24",
-                                    "expires":  "2026-07-24",
-                                    "days":  30,
-                                    "hardware":  null,
-                                    "revoked":  false,
-                                    "notes":  ""
-                                }
+  "DW2EC-ZH36J-OESDU-DT3HA": {
+    "created": "2026-06-24",
+    "expires": "2026-07-24",
+    "days": 30,
+    "hardware": "1743777675B5D4D5779BD4BF1ED1DBCA",
+    "revoked": true,
+    "notes": ""
+  },
+  "ASLK3-9PW99-WIPKB-HNLDR": {
+    "created": "2026-06-24",
+    "expires": "2026-07-24",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "517QA-92057-Q2IJ4-PDIHY": {
+    "created": "2026-06-24",
+    "expires": "2026-07-24",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  }
 }
