@@ -209,19 +209,19 @@ function Show-MainMenu {
 }
 
 function Get-SteamPath {
-    $default = "C:\Program Files (x86)\Steam\steam.exe"
-    $p = $default
+    $p = "C:\Program Files (x86)\Steam\steam.exe"
+    if (Test-Path $p) { return $p }
+    # Se nao achou no padrao, tenta ler do registro
     try {
         $raw = (Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop).SteamExe
-        $raw = $raw -replace '"','' -replace "'",'' -replace '/','\'
-        if ($raw -and (Test-Path $raw)) { $p = $raw }
+        $raw = $raw.Trim('"', "'").Replace('/', '\')
+        if ($raw -and (Test-Path $raw)) { return $raw }
     } catch {}
     return $p
 }
 
 function Invoke-Block {
     $steamPath = Get-SteamPath
-    Write-Host "Caminho Steam: $steamPath" -ForegroundColor Gray
     try {
         Remove-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction SilentlyContinue
         New-NetFirewallRule -DisplayName "$script:RULE_NAME" -Direction Outbound -Action Block -Program "$steamPath" -Enabled True -ErrorAction Stop | Out-Null
@@ -238,7 +238,7 @@ function Invoke-Unblock {
         Remove-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction Stop
         Write-Host "STEAM LIBERADO!" -ForegroundColor Green
     } catch {
-        Write-Host "Nao havia regra para remover (ja esta liberado)." -ForegroundColor Yellow
+        Write-Host "JA ESTA LIBERADO (nenhuma regra encontrada)." -ForegroundColor Yellow
     }
     Start-Sleep -Seconds 2
 }
