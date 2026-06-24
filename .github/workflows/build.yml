@@ -1,0 +1,29 @@
+name: Build EXE
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar ps2exe
+        run: |
+          Install-PackageProvider -Name NuGet -Force
+          Install-Module -Name ps2exe -Force -SkipPublisherCheck -Scope CurrentUser
+
+      - name: Compilar EXE
+        shell: powershell
+        run: |
+          .\build.ps1 -GithubToken "${{ secrets.GH_TOKEN }}" -Owner "mira2022004-sketch" -Repo "bypass-pro"
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: BypassPro
+          path: BypassPro.exe
