@@ -209,21 +209,29 @@ function Show-MainMenu {
 }
 
 function Get-SteamPath {
-    $p = "C:\Program Files (x86)\Steam\steam.exe"
-    try { $p = (Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop).SteamExe } catch {}
+    $default = Join-Path ${env:ProgramFiles(x86)} "Steam\steam.exe"
+    if (-not (Test-Path $default)) { $default = "C:\Program Files (x86)\Steam\steam.exe" }
+    $p = $default
+    try {
+        $raw = (Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop).SteamExe
+        $raw = $raw -replace '"','' -replace "'",''
+        if ($raw -and (Test-Path $raw)) { $p = $raw }
+    } catch {}
     return $p
 }
 
 function Invoke-Block {
     $steamPath = Get-SteamPath
+    Write-Host "Caminho Steam: $steamPath" -ForegroundColor Gray
     try {
         Remove-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction SilentlyContinue
         New-NetFirewallRule -DisplayName "$script:RULE_NAME" -Direction Outbound -Action Block -Program "$steamPath" -Enabled True -ErrorAction Stop | Out-Null
         Write-Host "STEAM BLOQUEADO!" -ForegroundColor Green
     } catch {
-        Write-Host "FALHA ao bloquear: $_" -ForegroundColor Red
+        Write-Host "ERRO:" -ForegroundColor Red -NoNewline
+        Write-Host " $($_.Exception.Message)" -ForegroundColor White
     }
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 3
 }
 
 function Invoke-Unblock {
@@ -231,7 +239,7 @@ function Invoke-Unblock {
         Remove-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction Stop
         Write-Host "STEAM LIBERADO!" -ForegroundColor Green
     } catch {
-        Write-Host "FALHA ao liberar (pode ja estar liberado)." -ForegroundColor Yellow
+        Write-Host "Nao havia regra para remover (ja esta liberado)." -ForegroundColor Yellow
     }
     Start-Sleep -Seconds 2
 }
