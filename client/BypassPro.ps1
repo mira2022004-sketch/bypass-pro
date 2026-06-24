@@ -2,7 +2,6 @@
 
 # ============================================================
 #  BYPASS PRO - Ativação via GitHub
-#  (Estes valores são substituídos pelo build.ps1)
 # ============================================================
 $script:GITHUB_TOKEN = "SEU_GITHUB_TOKEN_AQUI"
 $script:GITHUB_OWNER = "mira2022004-sketch"
@@ -74,12 +73,14 @@ function Get-KeysFromGitHub {
         $content = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($response.content))
         return @{ Keys = ($content | ConvertFrom-Json); Sha = $response.sha }
     } catch {
+        Write-Host "ERRO: Nao foi possivel conectar ao servidor de ativacao." -ForegroundColor Red
+        Write-Host "Detalhes: $_" -ForegroundColor DarkRed
         return $null
     }
 }
 
 function Write-KeyToGitHub {
-    param([string]$KeyId, [string]$HardwareId, [string]$Sha)
+    param([string]$KeyId, [string]$HardwareId)
     $result = Get-KeysFromGitHub
     if (-not $result) { return $false }
     $keys = $result.Keys
@@ -98,21 +99,39 @@ function Write-KeyToGitHub {
 # --- Validação ---
 function Test-KeyRemote {
     param([string]$LicenseKey, [string]$HardwareId)
+    Write-Host "Verificando chave..." -ForegroundColor Yellow
     $result = Get-KeysFromGitHub
     if (-not $result) { return $false }
     $keys = $result.Keys
-    if (-not $keys.$LicenseKey) { return $false }
+    if (-not $keys.$LicenseKey) {
+        Write-Host "Chave nao encontrada no servidor." -ForegroundColor Red
+        return $false
+    }
     $entry = $keys.$LicenseKey
-    if ($entry.revoked -eq $true) { return $false }
+    if ($entry.revoked -eq $true) {
+        Write-Host "Esta chave foi revogada." -ForegroundColor Red
+        return $false
+    }
     try {
         $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
-        if ((Get-Date) -gt $expires) { return $false }
+        if ((Get-Date) -gt $expires) {
+            Write-Host "Chave expirada em $($entry.expires)." -ForegroundColor Red
+            return $false
+        }
     } catch { return $false }
-    if ($entry.hardware -and $entry.hardware -ne $HardwareId) { return $false }
-    if (-not $entry.hardware) {
-        $ok = Write-KeyToGitHub -KeyId $LicenseKey -HardwareId $HardwareId -Sha $result.Sha
-        if (-not $ok) { return $false }
+    if ($entry.hardware -and $entry.hardware -ne $HardwareId) {
+        Write-Host "Chave ja ativada em outro computador." -ForegroundColor Red
+        return $false
     }
+    if (-not $entry.hardware) {
+        Write-Host "Vinculando chave a este computador..." -ForegroundColor Yellow
+        $ok = Write-KeyToGitHub -KeyId $LicenseKey -HardwareId $HardwareId
+        if (-not $ok) {
+            Write-Host "Falha ao vincular chave. Tente novamente." -ForegroundColor Red
+            return $false
+        }
+    }
+    Write-Host "Chave validada com sucesso!" -ForegroundColor Green
     return $true
 }
 
@@ -127,31 +146,32 @@ function Show-ActivationScreen {
     Write-Host "Digite sua chave de licenca para continuar." -ForegroundColor Yellow
     Write-Host ""
 
-    $key = Read-Host "Chave de licenca (ex: ABCDE-12345-FGHIJ-67890)"
+    $key = Read-Host "Chave de licenca"
     if ([string]::IsNullOrWhiteSpace($key)) {
         Write-Host "Chave invalida." -ForegroundColor Red
         Start-Sleep -Seconds 2; return $false
     }
 
     $hwId = Get-HardwareId
-    Write-Host "Verificando chave..." -ForegroundColor Yellow
     $valid = Test-KeyRemote -LicenseKey $key.Trim() -HardwareId $hwId
 
     if ($valid) {
         Save-LocalActivation -LicenseKey $key.Trim()
         Write-Host ""
-        Write-Host "Ativado com sucesso!" -ForegroundColor Green
+        Write-Host "ATIVADO COM SUCESSO!" -ForegroundColor Green
+        Write-Host "O menu sera exibido em instantes..." -ForegroundColor Green
         Start-Sleep -Seconds 2; return $true
     } else {
         Write-Host ""
         Write-Host "Falha na ativacao." -ForegroundColor Red
-        Write-Host "Motivos possiveis: chave invalida, expirada, revogada ou ja em uso em outro PC." -ForegroundColor Red
-        Start-Sleep -Seconds 4; return $false
+        Start-Sleep -Seconds 3; return $false
     }
 }
 
 # --- Menu principal ---
 function Show-MainMenu {
+    param([switch]$FirstRun)
+
     $steamPath = "C:\Program Files (x86)\Steam\steam.exe"
     try {
         $reg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop
@@ -182,13 +202,12 @@ function Show-MainMenu {
     Write-Host ""
     Write-Host "Pressione a tecla correspondente..." -NoNewline
 
-    $key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-    switch ($key.Character) {
+    $k = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    switch ($k.Character) {
         '1' { Invoke-Block }
         '2' { Invoke-Unblock }
         '3' { exit }
     }
-    Show-MainMenu
 }
 
 function Invoke-Block {
@@ -202,37 +221,29 @@ function Invoke-Unblock {
     netsh advfirewall firewall delete rule name="$script:RULE_NAME" >$null 2>&1
 }
 
-# --- Main ---
-$identity = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
-$isAdmin = $identity.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+# ===================== MAIN =====================
+# O ps2exe com -requireAdmin já garante execução como admin
+# Não precisa do bloco de restart manual
 
-if (-not $isAdmin) {
-    Write-Host "Reiniciando como administrador..." -ForegroundColor Yellow
-    Start-Sleep -Seconds 1
-    $scriptPath = if ($MyInvocation.MyCommand.Path) { $MyInvocation.MyCommand.Path } else { ".\BypassPro.ps1" }
-    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
-    exit
-}
-
-# Verificar ativacao a cada execucao
+# Verificar ativação
 $local = Get-LocalActivation
 $needActivation = $true
 
 if ($local) {
     $currentHw = Get-HardwareId
     if ($local.HardwareId -eq $currentHw) {
-        $result = Get-KeysFromGitHub
-        if ($result -and $result.Keys.$($local.Key)) {
-            $entry = $result.Keys.$($local.Key)
-            if ($entry.revoked -ne $true) {
-                try {
+        try {
+            $result = Get-KeysFromGitHub
+            if ($result -and $result.Keys.$($local.Key)) {
+                $entry = $result.Keys.$($local.Key)
+                if ($entry.revoked -ne $true) {
                     $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
                     if ((Get-Date) -le $expires) {
                         $needActivation = $false
                     }
-                } catch {}
+                }
             }
-        }
+        } catch {}
     }
 }
 
@@ -247,4 +258,7 @@ if ($needActivation) {
     if ($needActivation) { exit }
 }
 
-while ($true) { Show-MainMenu }
+# Loop principal
+while ($true) {
+    Show-MainMenu
+}

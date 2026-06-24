@@ -18,7 +18,7 @@ $content = $content -replace '(?<=GITHUB_REPO = ").*?(?=")', $Repo
 Set-Content $tempScript -Value $content -Encoding UTF8
 
 try {
-    Invoke-ps2exe -InputFile $tempScript -OutputFile $outputExe -requireAdmin -title "Bypass Pro" -product "Bypass Pro" -description "Reconnect Bypass Tool" -version "1.0.0" -UNICODEEncoding -noOutput -noError -ErrorAction Stop
+    Invoke-ps2exe -InputFile $tempScript -OutputFile $outputExe -requireAdmin -title "Bypass Pro" -product "Bypass Pro" -description "Reconnect Bypass Tool" -version "1.0.0" -UNICODEEncoding -ErrorAction Stop
     Write-Host "EXE gerado com sucesso: $outputExe" -ForegroundColor Green
     Write-Host "Token configurado: $($GithubToken.Substring(0, 8))..." -ForegroundColor Yellow
     Write-Host "Repositorio: $Owner/$Repo" -ForegroundColor Yellow
