@@ -1,14 +1,21 @@
 #Requires -Version 5.0
 
 # ============================================================
-#  BYPASS PRO - Cliente com ativação por chave
+#  BYPASS PRO - Ativação via GitHub
+#  (Estes valores são substituídos pelo build.ps1)
+# ============================================================
+$script:GITHUB_TOKEN = "SEU_GITHUB_TOKEN_AQUI"
+$script:GITHUB_OWNER = "mira2022004-sketch"
+$script:GITHUB_REPO = "bypass-pro"
+$script:KEYS_FILE = "keys.json"
 # ============================================================
 
-$script:SERVER_URL = "https://SEU-SERVIDOR.railway.app"  # <-- ALTERE AQUI ANTES DE COMPILAR!
 $script:ACTIVATION_FILE = "$env:APPDATA\BypassPro\activation.dat"
 $script:RULE_NAME = "7XnIUxGt4Tw13Lzm"
+$script:API = "https://api.github.com/repos/$($script:GITHUB_OWNER)/$($script:GITHUB_REPO)/contents/$($script:KEYS_FILE)"
+$script:GITHUB_HEADERS = @{ Authorization = "Bearer $($script:GITHUB_TOKEN)"; Accept = "application/vnd.github.v3+json" }
 
-# --- Funções de Hardware ID ---
+# --- Hardware ID ---
 function Get-HardwareId {
     $mac = (Get-NetAdapter -Physical | Where-Object Status -eq 'Up' | Select-Object -First 1).MacAddress
     if (-not $mac) { $mac = '00-00-00-00-00-00' }
@@ -21,7 +28,7 @@ function Get-HardwareId {
     return $hash
 }
 
-# --- Funções de Criptografia (DPAPI) ---
+# --- DPAPI ---
 function Protect-Data {
     param([string]$Text)
     Add-Type -AssemblyName System.Security
@@ -38,64 +45,75 @@ function Unprotect-Data {
     return [System.Text.Encoding]::UTF8.GetString($decrypted)
 }
 
-# --- Ativação ---
-function Get-ActivationStatus {
+# --- Ativação local ---
+function Get-LocalActivation {
     if (-not (Test-Path $script:ACTIVATION_FILE)) { return $null }
-
     try {
         $encrypted = Get-Content $script:ACTIVATION_FILE -Raw -ErrorAction Stop
         $data = Unprotect-Data -Base64 $encrypted
         $parts = $data -split '\|'
         if ($parts.Length -ne 2) { return $null }
-        return @{
-            HardwareId = $parts[0]
-            Key = $parts[1]
-        }
-    } catch {
-        return $null
-    }
+        return @{ HardwareId = $parts[0]; Key = $parts[1] }
+    } catch { return $null }
 }
 
-function Test-ActivationValid {
-    $activation = Get-ActivationStatus
-    if (-not $activation) { return $false }
-
-    $currentHwId = Get-HardwareId
-    if ($activation.HardwareId -ne $currentHwId) { return $false }
-
-    return $true
-}
-
-function Save-Activation {
+function Save-LocalActivation {
     param([string]$LicenseKey)
     $hwId = Get-HardwareId
     $data = "$hwId|$LicenseKey"
     $encrypted = Protect-Data -Text $data
-
     $dir = Split-Path $script:ACTIVATION_FILE -Parent
     if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
     Set-Content -Path $script:ACTIVATION_FILE -Value $encrypted -Force
 }
 
-# --- Validação com o servidor ---
-function Test-KeyWithServer {
-    param([string]$LicenseKey, [string]$HardwareId)
-
-    $body = @{
-        licenseKey = $LicenseKey
-        hardwareId = $HardwareId
-    } | ConvertTo-Json
-
+# --- GitHub API ---
+function Get-KeysFromGitHub {
     try {
-        $response = Invoke-RestMethod -Uri "$script:SERVER_URL/api/validate" `
-            -Method Post `
-            -Body $body `
-            -ContentType 'application/json' `
-            -ErrorAction Stop
-        return $response.valid
+        $response = Invoke-RestMethod -Uri $script:API -Headers $script:GITHUB_HEADERS -ErrorAction Stop
+        $content = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($response.content))
+        return @{ Keys = ($content | ConvertFrom-Json); Sha = $response.sha }
     } catch {
-        return $false
+        return $null
     }
+}
+
+function Write-KeyToGitHub {
+    param([string]$KeyId, [string]$HardwareId, [string]$Sha)
+    $result = Get-KeysFromGitHub
+    if (-not $result) { return $false }
+    $keys = $result.Keys
+    $sha = $result.Sha
+    if (-not $keys.$KeyId) { return $false }
+    if ($keys.$KeyId.hardware) { return $false }
+    $keys.$KeyId.hardware = $HardwareId
+    $newContent = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($keys | ConvertTo-Json -Depth 5)))
+    $body = @{ message = "ativacao: $KeyId"; content = $newContent; sha = $sha } | ConvertTo-Json
+    try {
+        Invoke-RestMethod -Uri $script:API -Method Put -Body $body -Headers $script:GITHUB_HEADERS -ErrorAction Stop | Out-Null
+        return $true
+    } catch { return $false }
+}
+
+# --- Validação ---
+function Test-KeyRemote {
+    param([string]$LicenseKey, [string]$HardwareId)
+    $result = Get-KeysFromGitHub
+    if (-not $result) { return $false }
+    $keys = $result.Keys
+    if (-not $keys.$LicenseKey) { return $false }
+    $entry = $keys.$LicenseKey
+    if ($entry.revoked -eq $true) { return $false }
+    try {
+        $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
+        if ((Get-Date) -gt $expires) { return $false }
+    } catch { return $false }
+    if ($entry.hardware -and $entry.hardware -ne $HardwareId) { return $false }
+    if (-not $entry.hardware) {
+        $ok = Write-KeyToGitHub -KeyId $LicenseKey -HardwareId $HardwareId -Sha $result.Sha
+        if (-not $ok) { return $false }
+    }
+    return $true
 }
 
 # --- Tela de Ativação ---
@@ -110,33 +128,30 @@ function Show-ActivationScreen {
     Write-Host ""
 
     $key = Read-Host "Chave de licenca (ex: ABCDE-12345-FGHIJ-67890)"
-
     if ([string]::IsNullOrWhiteSpace($key)) {
         Write-Host "Chave invalida." -ForegroundColor Red
-        Start-Sleep -Seconds 2
-        return $false
+        Start-Sleep -Seconds 2; return $false
     }
 
     $hwId = Get-HardwareId
-    $valid = Test-KeyWithServer -LicenseKey $key.Trim() -HardwareId $hwId
+    Write-Host "Verificando chave..." -ForegroundColor Yellow
+    $valid = Test-KeyRemote -LicenseKey $key.Trim() -HardwareId $hwId
 
     if ($valid) {
-        Save-Activation -LicenseKey $key.Trim()
+        Save-LocalActivation -LicenseKey $key.Trim()
         Write-Host ""
         Write-Host "Ativado com sucesso!" -ForegroundColor Green
-        Start-Sleep -Seconds 2
-        return $true
+        Start-Sleep -Seconds 2; return $true
     } else {
         Write-Host ""
-        Write-Host "Falha na ativacao. Verifique a chave e tente novamente." -ForegroundColor Red
-        Start-Sleep -Seconds 3
-        return $false
+        Write-Host "Falha na ativacao." -ForegroundColor Red
+        Write-Host "Motivos possiveis: chave invalida, expirada, revogada ou ja em uso em outro PC." -ForegroundColor Red
+        Start-Sleep -Seconds 4; return $false
     }
 }
 
-# --- Menu principal (funcionalidade original) ---
+# --- Menu principal ---
 function Show-MainMenu {
-    # Obtém caminho do Steam
     $steamPath = "C:\Program Files (x86)\Steam\steam.exe"
     try {
         $reg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop
@@ -179,10 +194,7 @@ function Show-MainMenu {
 function Invoke-Block {
     netsh advfirewall firewall delete rule name="$script:RULE_NAME" >$null 2>&1
     $steamPath = "C:\Program Files (x86)\Steam\steam.exe"
-    try {
-        $reg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop
-        $steamPath = $reg.SteamExe
-    } catch {}
+    try { $reg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop; $steamPath = $reg.SteamExe } catch {}
     netsh advfirewall firewall add rule name="$script:RULE_NAME" dir=out action=block program="$steamPath" enable=yes >$null 2>&1
 }
 
@@ -191,7 +203,6 @@ function Invoke-Unblock {
 }
 
 # --- Main ---
-# Verificar admin
 $identity = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
 $isAdmin = $identity.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
@@ -203,20 +214,37 @@ if (-not $isAdmin) {
     exit
 }
 
-# Verificar ativação
-if (-not (Test-ActivationValid)) {
-    # Modo reativação: até 3 tentativas
-    for ($i = 0; $i -lt 3; $i++) {
-        if (Show-ActivationScreen) { break }
-        if ($i -eq 2) {
-            Write-Host "Numero maximo de tentativas excedido. O programa sera encerrado." -ForegroundColor Red
-            Start-Sleep -Seconds 3
-            exit
+# Verificar ativacao a cada execucao
+$local = Get-LocalActivation
+$needActivation = $true
+
+if ($local) {
+    $currentHw = Get-HardwareId
+    if ($local.HardwareId -eq $currentHw) {
+        $result = Get-KeysFromGitHub
+        if ($result -and $result.Keys.$($local.Key)) {
+            $entry = $result.Keys.$($local.Key)
+            if ($entry.revoked -ne $true) {
+                try {
+                    $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
+                    if ((Get-Date) -le $expires) {
+                        $needActivation = $false
+                    }
+                } catch {}
+            }
         }
     }
 }
 
-# Loop do menu principal
-while ($true) {
-    Show-MainMenu
+if ($needActivation) {
+    for ($i = 0; $i -lt 3; $i++) {
+        if (Show-ActivationScreen) { $needActivation = $false; break }
+        if ($i -eq 2) {
+            Write-Host "Numero maximo de tentativas excedido." -ForegroundColor Red
+            Start-Sleep -Seconds 3; exit
+        }
+    }
+    if ($needActivation) { exit }
 }
+
+while ($true) { Show-MainMenu }
