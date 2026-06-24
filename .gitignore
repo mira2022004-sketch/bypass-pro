@@ -3,4 +3,6 @@ server/keys.db
 client/activation.dat
 __pycache__/
 *.pyc
-*.exe
+BypassPro.exe
+KeyManager/
+
