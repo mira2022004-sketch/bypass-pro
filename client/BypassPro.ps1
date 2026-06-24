@@ -170,16 +170,15 @@ function Show-ActivationScreen {
 
 # --- Menu principal ---
 function Show-MainMenu {
-    param([switch]$FirstRun)
-
     $steamPath = "C:\Program Files (x86)\Steam\steam.exe"
     try {
         $reg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop
         $steamPath = $reg.SteamExe
     } catch {}
 
+    $n = "$env:windir\system32\netsh.exe"
     cls
-    $ruleExists = $null -ne (netsh advfirewall firewall show rule name="$script:RULE_NAME" 2>$null)
+    $ruleExists = $null -ne (& $n advfirewall firewall show rule name="$script:RULE_NAME" 2>$null)
 
     Write-Host "===================================================" -ForegroundColor White
     Write-Host "               RECONNECT BYPASS PRO                 " -ForegroundColor White
@@ -206,19 +205,34 @@ function Show-MainMenu {
     switch ($k.Character) {
         '1' { Invoke-Block }
         '2' { Invoke-Unblock }
-        '3' { exit }
+        '3' { return $false }
     }
+    return $true
 }
 
 function Invoke-Block {
-    netsh advfirewall firewall delete rule name="$script:RULE_NAME" >$null 2>&1
+    $n = "$env:windir\system32\netsh.exe"
     $steamPath = "C:\Program Files (x86)\Steam\steam.exe"
     try { $reg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop; $steamPath = $reg.SteamExe } catch {}
-    netsh advfirewall firewall add rule name="$script:RULE_NAME" dir=out action=block program="$steamPath" enable=yes >$null 2>&1
+    & $n advfirewall firewall delete rule name="$script:RULE_NAME" | Out-Null
+    & $n advfirewall firewall add rule name="$script:RULE_NAME" dir=out action=block program="$steamPath" enable=yes | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "STEAM BLOQUEADO com sucesso!" -ForegroundColor Green
+    } else {
+        Write-Host "Falha ao bloquear. Execute como Administrador." -ForegroundColor Red
+    }
+    Start-Sleep -Seconds 1
 }
 
 function Invoke-Unblock {
-    netsh advfirewall firewall delete rule name="$script:RULE_NAME" >$null 2>&1
+    $n = "$env:windir\system32\netsh.exe"
+    & $n advfirewall firewall delete rule name="$script:RULE_NAME" | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "STEAM LIBERADO com sucesso!" -ForegroundColor Green
+    } else {
+        Write-Host "Falha ao liberar. Execute como Administrador." -ForegroundColor Red
+    }
+    Start-Sleep -Seconds 1
 }
 
 # ===================== MAIN =====================
@@ -259,6 +273,4 @@ if ($needActivation) {
 }
 
 # Loop principal
-while ($true) {
-    Show-MainMenu
-}
+while (Show-MainMenu) {}
