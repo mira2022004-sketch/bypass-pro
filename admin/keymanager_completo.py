@@ -100,6 +100,8 @@ def save_keys(keys, sha):
 
 def format_date(date_str):
     """Formata data para exibição"""
+    if not date_str:
+        return "---"
     try:
         dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         return dt.strftime("%d/%m/%Y")
@@ -110,6 +112,11 @@ def get_status(key_data):
     """Retorna o status de uma chave"""
     if key_data.get("revoked"):
         return "REVOGADA", "red"
+    
+    if not key_data.get("expires"):
+        if key_data.get("hardware"):
+            return "ATIVADA", "green"
+        return "DISPONIVEL", "yellow"
     
     try:
         exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -185,10 +192,9 @@ def menu_gerar():
             print("ERRO: Nao foi possivel gerar chave unica")
             continue
         
-        exp = (datetime.now(timezone.utc) + timedelta(days=dias)).strftime("%Y-%m-%d")
         keys[k] = {
             "created": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-            "expires": exp,
+            "expires": "",
             "days": dias,
             "hardware": None,
             "revoked": False,
@@ -236,7 +242,7 @@ def menu_listar():
     ativadas = sum(1 for v in keys.values() if v.get("hardware") and not v.get("revoked"))
     disponiveis = sum(1 for v in keys.values() if not v.get("hardware") and not v.get("revoked"))
     revogadas = sum(1 for v in keys.values() if v.get("revoked"))
-    expiradas = sum(1 for v in keys.values() if not v.get("revoked") and 
+    expiradas = sum(1 for v in keys.values() if not v.get("revoked") and v.get("expires") and 
                     datetime.strptime(v["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc) < datetime.now(timezone.utc))
     
     print(f"Total: {total} | Ativadas: {ativadas} | Disponiveis: {disponiveis} | Revogadas: {revogadas} | Expiradas: {expiradas}")
@@ -290,11 +296,15 @@ def menu_ativar():
         input("\nPressione Enter...")
         return
     
-    exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    if exp < datetime.now(timezone.utc):
-        print("\nERRO: Esta chave esta expirada!")
-        input("\nPressione Enter...")
-        return
+    if key_data.get("expires"):
+        try:
+            exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            if exp < datetime.now(timezone.utc):
+                print("\nERRO: Esta chave esta expirada!")
+                input("\nPressione Enter...")
+                return
+        except:
+            pass
     
     if key_data.get("hardware"):
         print(f"\nAVISO: Esta chave ja esta vinculada ao hardware: {key_data['hardware'][:16]}...")
@@ -302,9 +312,12 @@ def menu_ativar():
         if confirma != "S":
             return
     
-    # Ativar
+    # Ativar - calcula expiração a partir de agora + days
+    agora = datetime.now(timezone.utc)
+    dias = key_data.get("days", 30)
     keys[chave]["hardware"] = hardware_id
-    keys[chave]["activated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    keys[chave]["activated_at"] = agora.strftime("%Y-%m-%d %H:%M:%S")
+    keys[chave]["expires"] = (agora + timedelta(days=dias)).strftime("%Y-%m-%d")
     
     if save_keys(keys, sha):
         print(f"\n{'='*70}")
@@ -312,7 +325,7 @@ def menu_ativar():
         print(f"{'='*70}")
         print(f"  Chave: {chave}")
         print(f"  Hardware: {hardware_id[:32]}...")
-        print(f"  Expira em: {format_date(key_data['expires'])}")
+        print(f"  Expira em: {format_date(keys[chave]['expires'])}")
         print(f"{'='*70}")
     else:
         print("\nErro ao salvar!")
@@ -579,7 +592,10 @@ def menu_estender():
         input("\nPressione Enter...")
         return
     
-    exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=dias)
+    if key_data.get("expires"):
+        exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=dias)
+    else:
+        exp = datetime.now(timezone.utc) + timedelta(days=dias)
     keys[chave]["expires"] = exp.strftime("%Y-%m-%d")
     keys[chave]["days"] = key_data.get("days", 0) + dias
     keys[chave]["extended_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")

@@ -97,6 +97,10 @@ function Test-KeyRemote {
         Write-Host "Esta chave foi revogada." -ForegroundColor Red
         return $false
     }
+    if (-not $entry.expires) {
+        Write-Host "Chave ainda nao ativada pelo suporte." -ForegroundColor Red
+        return $false
+    }
     try {
         $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
         if ((Get-Date) -gt $expires) {
@@ -149,6 +153,16 @@ function Test-LicenseStillValid {
         Write-Host "========================================" -ForegroundColor Red
         Write-Host "Sua licenca foi cancelada." -ForegroundColor Yellow
         Write-Host "Entre em contato com o suporte." -ForegroundColor Yellow
+        Start-Sleep -Seconds 5
+        return $false
+    }
+    
+    if (-not $entry.expires) {
+        Write-Host "`n========================================" -ForegroundColor Red
+        Write-Host " ERRO: CHAVE NAO ATIVADA!" -ForegroundColor Red
+        Write-Host "========================================" -ForegroundColor Red
+        Write-Host "Esta chave ainda nao possui data de expiracao." -ForegroundColor Yellow
+        Write-Host "Entre em contato com o suporte para ativar." -ForegroundColor Yellow
         Start-Sleep -Seconds 5
         return $false
     }
@@ -275,9 +289,13 @@ function Show-MainMenu {
         $result = Get-KeysFromGitHub
         if ($result -and $result.Keys.$($local.Key)) {
             $entry = $result.Keys.$($local.Key)
-            $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
-            $daysLeft = ($expires - (Get-Date)).Days
-            Write-Host " Licenca: Valida ate $($expires.ToString('dd/MM/yyyy')) ($daysLeft dias)" -ForegroundColor Green
+            if ($entry.expires) {
+                $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
+                $daysLeft = ($expires - (Get-Date)).Days
+                Write-Host " Licenca: Valida ate $($expires.ToString('dd/MM/yyyy')) ($daysLeft dias)" -ForegroundColor Green
+            } else {
+                Write-Host " Licenca: Ativa" -ForegroundColor Green
+            }
         } else {
             Write-Host " Licenca: Ativa (verificacao offline)" -ForegroundColor Yellow
         }
