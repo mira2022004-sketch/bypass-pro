@@ -1,34 +1,114 @@
 {
-    "DW2EC-ZH36J-OESDU-DT3HA":  {
-                                    "created":  "2026-06-24",
-                                    "expires":  "2026-07-24",
-                                    "days":  30,
-                                    "hardware":  null,
-                                    "revoked":  true,
-                                    "notes":  ""
-                                },
-    "ASLK3-9PW99-WIPKB-HNLDR":  {
-                                    "created":  "2026-06-24",
-                                    "expires":  "2026-07-24",
-                                    "days":  30,
-                                    "hardware":  "1743777675B5D4D5779BD4BF1ED1DBCA",
-                                    "revoked":  false,
-                                    "notes":  ""
-                                },
-    "517QA-92057-Q2IJ4-PDIHY":  {
-                                    "created":  "2026-06-24",
-                                    "expires":  "2026-07-24",
-                                    "days":  30,
-                                    "hardware":  "CE8C1A9512E0393BC044C6A8C52D879A",
-                                    "revoked":  false,
-                                    "notes":  ""
-                                },
-    "3QMM8-4UJ65-A7WVT-2LONP":  {
-                                    "created":  "2026-06-25",
-                                    "expires":  "2026-07-25",
-                                    "days":  30,
-                                    "hardware":  "3832C8A088C8CCE80F61080DAD43CF31",
-                                    "revoked":  false,
-                                    "notes":  ""
-                                }
+  "DW2EC-ZH36J-OESDU-DT3HA": {
+    "created": "2026-06-24",
+    "expires": "2026-07-24",
+    "days": 30,
+    "hardware": null,
+    "revoked": true,
+    "notes": ""
+  },
+  "ASLK3-9PW99-WIPKB-HNLDR": {
+    "created": "2026-06-24",
+    "expires": "2026-07-24",
+    "days": 30,
+    "hardware": "1743777675B5D4D5779BD4BF1ED1DBCA",
+    "revoked": false,
+    "notes": ""
+  },
+  "517QA-92057-Q2IJ4-PDIHY": {
+    "created": "2026-06-24",
+    "expires": "2026-07-24",
+    "days": 30,
+    "hardware": "CE8C1A9512E0393BC044C6A8C52D879A",
+    "revoked": false,
+    "notes": ""
+  },
+  "3QMM8-4UJ65-A7WVT-2LONP": {
+    "created": "2026-06-25",
+    "expires": "2026-07-25",
+    "days": 30,
+    "hardware": "3832C8A088C8CCE80F61080DAD43CF31",
+    "revoked": false,
+    "notes": ""
+  },
+  "QNSXN-UCRX1-V2J88-U92TV": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "MILCK-X18B8-URGGC-GV2JG": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "X94BH-A6G03-EUJ93-5U6UX": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "D9933-V1WAJ-Q7XNB-U92JZ": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "PXSHS-KLHHV-1F68M-FX4G0": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "EUC69-1HN4R-D4ZJP-5CJFA": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "LD998-2OHB4-A8YD8-JJHCI": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "JWR9M-E8XTN-4V1AI-HV7V1": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "IWW9K-Z7VLT-UF3TU-HK7VA": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  },
+  "4E1KH-X7YAY-H6IOC-05IDW": {
+    "created": "2026-06-28",
+    "expires": "2026-07-28",
+    "days": 30,
+    "hardware": null,
+    "revoked": false,
+    "notes": ""
+  }
 }
