@@ -265,17 +265,13 @@ def menu_listar():
 # ============================================================
 
 def menu_ativar():
-    """Ativa uma chave vinculando a um hardware"""
+    """Ativa uma chave (inicia contagem de expiração)"""
     clear_screen()
     print_header()
-    print("\n>>> ATIVAR CHAVE (Vincular Hardware) <<<\n")
+    print("\n>>> ATIVAR CHAVE (Iniciar Validade) <<<\n")
     
     chave = input("Digite a chave: ").strip().upper()
     if not chave:
-        return
-    
-    hardware_id = input("Digite o Hardware ID: ").strip()
-    if not hardware_id:
         return
     
     keys, sha = get_keys()
@@ -290,32 +286,20 @@ def menu_ativar():
     
     key_data = keys[chave]
     
-    # Verificações
     if key_data.get("revoked"):
         print("\nERRO: Esta chave foi revogada!")
         input("\nPressione Enter...")
         return
     
-    if key_data.get("expires"):
-        try:
-            exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
-            if exp < datetime.now(timezone.utc):
-                print("\nERRO: Esta chave esta expirada!")
-                input("\nPressione Enter...")
-                return
-        except:
-            pass
-    
-    if key_data.get("hardware"):
-        print(f"\nAVISO: Esta chave ja esta vinculada ao hardware: {key_data['hardware'][:16]}...")
-        confirma = input("Deseja SOBRESCREVER o vinculo? (S/N): ").strip().upper()
+    if key_data.get("activated_at"):
+        print(f"\nEsta chave ja foi ativada em {key_data['activated_at']}.")
+        print(f"Expira em: {format_date(key_data.get('expires', ''))}")
+        confirma = input("Deseja REATIVAR (reiniciar contagem)? (S/N): ").strip().upper()
         if confirma != "S":
             return
     
-    # Ativar - calcula expiração a partir de agora + days
     agora = datetime.now(timezone.utc)
     dias = key_data.get("days", 30)
-    keys[chave]["hardware"] = hardware_id
     keys[chave]["activated_at"] = agora.strftime("%Y-%m-%d %H:%M:%S")
     keys[chave]["expires"] = (agora + timedelta(days=dias)).strftime("%Y-%m-%d")
     
@@ -324,8 +308,9 @@ def menu_ativar():
         print(f"  CHAVE ATIVADA COM SUCESSO!")
         print(f"{'='*70}")
         print(f"  Chave: {chave}")
-        print(f"  Hardware: {hardware_id[:32]}...")
+        print(f"  Ativada em: {keys[chave]['activated_at']}")
         print(f"  Expira em: {format_date(keys[chave]['expires'])}")
+        print(f"  Hardware: vinculado automaticamente no 1o uso")
         print(f"{'='*70}")
     else:
         print("\nErro ao salvar!")

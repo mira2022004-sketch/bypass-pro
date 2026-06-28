@@ -78,6 +78,23 @@ function Get-KeysFromGitHub {
     }
 }
 
+function Write-KeyToGitHub {
+    param([string]$KeyId, [string]$HardwareId)
+    $result = Get-KeysFromGitHub
+    if (-not $result) { return $false }
+    $keys = $result.Keys
+    $sha = $result.Sha
+    if (-not $keys.$KeyId) { return $false }
+    $keys.$KeyId.hardware = $HardwareId
+    $keys.$KeyId.activated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
+    $newContent = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($keys | ConvertTo-Json -Depth 5 -Compress)))
+    $body = @{ message = "ativacao: $KeyId"; content = $newContent; sha = $sha } | ConvertTo-Json -Compress
+    try {
+        Invoke-RestMethod -Uri $script:API -Method Put -Body $body -Headers $script:GITHUB_HEADERS -TimeoutSec 10 -ErrorAction Stop | Out-Null
+        return $true
+    } catch { return $false }
+}
+
 # --- Validação COMPLETA (usado na ativação inicial) ---
 function Test-KeyRemote {
     param([string]$LicenseKey, [string]$HardwareId)
@@ -113,13 +130,12 @@ function Test-KeyRemote {
         return $false
     }
     if (-not $entry.hardware) {
-        Write-Host "`n========================================" -ForegroundColor Red
-        Write-Host " ERRO: CHAVE NAO ATIVADA!" -ForegroundColor Red
-        Write-Host "========================================" -ForegroundColor Red
-        Write-Host "Esta chave ainda nao foi ativada." -ForegroundColor Yellow
-        Write-Host "Entre em contato com o suporte para ativar." -ForegroundColor Yellow
-        Start-Sleep -Seconds 5
-        return $false
+        Write-Host "Vinculando chave a este computador..." -ForegroundColor Yellow
+        $ok = Write-KeyToGitHub -KeyId $LicenseKey -HardwareId $HardwareId
+        if (-not $ok) {
+            Write-Host "Falha ao vincular chave. Tente novamente." -ForegroundColor Red
+            return $false
+        }
     }
     Write-Host "Chave validada com sucesso!" -ForegroundColor Green
     return $true
@@ -194,13 +210,16 @@ function Test-LicenseStillValid {
     }
     
     if (-not $entry.hardware) {
-        Write-Host "`n========================================" -ForegroundColor Red
-        Write-Host " ERRO: CHAVE NAO ATIVADA!" -ForegroundColor Red
-        Write-Host "========================================" -ForegroundColor Red
-        Write-Host "Esta chave ainda nao foi ativada pelo suporte." -ForegroundColor Yellow
-        Write-Host "Entre em contato para ativar sua licenca." -ForegroundColor Yellow
-        Start-Sleep -Seconds 5
-        return $false
+        Write-Host "`nVinculando chave a este computador..." -ForegroundColor Yellow
+        $ok = Write-KeyToGitHub -KeyId $LicenseKey -HardwareId $HardwareId
+        if (-not $ok) {
+            Write-Host "Falha ao vincular chave." -ForegroundColor Red
+            Start-Sleep -Seconds 3
+            return $false
+        }
+        Write-Host "Chave vinculada com sucesso!" -ForegroundColor Green
+        Start-Sleep -Seconds 1
+        return $true
     }
     
     if ($entry.hardware -ne $HardwareId) {
