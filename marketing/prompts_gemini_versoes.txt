@@ -1,0 +1,231 @@
+════════════════════════════════════════════════════════════
+   PROMPTS OTIMIZADOS PARA GEMINI AI - BYPASS PRO
+════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────┐
+│  VERSÃO 1: SIMPLES E DIRETA (Recomendada para começar)  │
+└──────────────────────────────────────────────────────────┘
+
+Create a professional software advertisement banner, 1080x1080px:
+
+- Dark blue to purple gradient background with tech circuits pattern
+- Large glowing cyan text "BYPASS PRO" at top with neon effect
+- Subtitle "RECONNECT TOOL" in white
+- Central section with 4-5 checkmarks listing features:
+  ✓ Steam/Dota/CS:GO Compatible
+  ✓ Lifetime License
+  ✓ Auto Activation
+  ✓ Technical Support
+- Shield or firewall icon as main visual element
+- Bottom banner: "🔥 LIMITED OFFER 🔥" in gold
+- Cyberpunk gaming aesthetic, professional and modern
+- No usernames, accounts, or personal information
+- Glowing particles and digital effects
+
+
+┌──────────────────────────────────────────────────────────┐
+│  VERSÃO 2: DETALHADA (Melhor resultado visual)          │
+└──────────────────────────────────────────────────────────┘
+
+Create a high-quality gaming software advertisement poster, square format 1080x1080:
+
+BACKGROUND:
+- Deep blue (#0a0e27) to purple (#1e1b4b) gradient
+- Subtle tech circuit patterns
+- Floating luminous particles
+- Cyberpunk atmosphere with depth
+
+HEADER:
+- "BYPASS PRO" in futuristic font, cyan neon (#00d4ff) with intense glow
+- Small shield/firewall icon integrated with logo
+- Glowing lines framing the title
+
+CENTER:
+- "RECONNECT TOOL PRO" subtitle in white
+- 3D shield or firewall icon as focal point
+- Feature list with green checkmarks:
+  ✓ Steam / Dota 2 / CS:GO
+  ✓ Lifetime License Included
+  ✓ 1-Click Auto Activation
+  ✓ Hardware ID Protection
+  ✓ 24/7 Technical Support
+
+DECORATIVE ELEMENTS:
+- Steam logo icon (stylized)
+- Lightning bolt icons
+- Lock/security symbols
+- Hexagonal tech patterns
+
+FOOTER:
+- Semi-transparent box with "🔥 LIMITED PROMOTION 🔥"
+- Golden/yellow glowing text
+- Small text: "Professional Connection Management Tool"
+
+STYLE:
+- Professional gaming aesthetic
+- Premium software product look
+- Clean, modern, trustworthy
+- NO personal information, usernames, or UIDs
+- High contrast, eye-catching design
+
+
+┌──────────────────────────────────────────────────────────┐
+│  VERSÃO 3: ULTRA DETALHADA (Máxima qualidade)           │
+└──────────────────────────────────────────────────────────┘
+
+Generate a professional premium software advertisement banner for social media, exactly 1080x1080 pixels:
+
+COMPOSITION & LAYOUT:
+- Square format optimized for Instagram/Facebook/WhatsApp
+- Rule of thirds composition with clear visual hierarchy
+- Balanced negative space for readability
+
+BACKGROUND DESIGN:
+- Base: Deep space blue (#0a0e27) transitioning to electric purple (#1e1b4b)
+- Mid-layer: Abstract tech circuitry patterns with 20% opacity
+- Top-layer: Bokeh effect with cyan and purple particles
+- Subtle vignette darkening at edges
+- Radial gradient emanating from center
+
+TYPOGRAPHY:
+- Main title "BYPASS PRO": 
+  * Futuristic sans-serif (Orbitron/Exo style)
+  * Size: 80-100pt, bold weight
+  * Color: Bright cyan (#00d4ff)
+  * Effects: Outer glow (15px cyan), inner shadow
+  * Letter spacing: slightly expanded
+  
+- Subtitle "RECONNECT TOOL PRO":
+  * Size: 40-50pt, regular weight
+  * Color: White (#ffffff) with 80% opacity
+  * Thin cyan underline accent
+
+- Body text (features):
+  * Clean sans-serif font (Roboto/Inter style)
+  * Size: 28-32pt
+  * Color: White (#f0f0f0)
+  * Line height: 1.5x for readability
+
+VISUAL ELEMENTS:
+
+1. Hero Icon (center focal point):
+   - Large 3D shield with hexagonal pattern
+   - Metallic blue-purple gradient with reflections
+   - Glowing cyan edges
+   - Subtle depth shadow
+
+2. Supporting Icons (arranged around):
+   - Steam logo (official, monochrome white)
+   - Firewall/barrier icon
+   - Lightning bolt (speed symbol)
+   - Lock/security icon
+   - All icons: 64x64px, consistent style
+
+3. Feature List (center-left aligned):
+   Display with green checkmarks (✓) in #00ff88:
+   
+   ✓ Multi-Game Support
+     Steam • Dota 2 • CS:GO
+   
+   ✓ Lifetime License
+     No monthly fees
+   
+   ✓ Instant Activation
+     One-click setup
+   
+   ✓ Secure Binding
+     Hardware ID protection
+   
+   ✓ Premium Support
+     Technical assistance included
+
+4. Call-to-Action Banner (bottom):
+   - Rounded rectangle with gradient: gold (#ffd700) to orange (#ff8c00)
+   - Text: "🔥 LIMITED TIME OFFER 🔥"
+   - Font: Bold, 36-40pt
+   - Pulsing glow effect
+   - Drop shadow for depth
+
+5. Secondary Badge (top-right corner):
+   - Small ribbon/badge: "ORIGINAL LICENSE"
+   - Color: Purple (#8b5cf6) with gold border
+   - Size: 120x40px
+
+EFFECTS & DETAILS:
+- Lens flare accent at top-right
+- Scan lines overlay (5% opacity) for tech feel
+- Holographic shimmer on main elements
+- Motion blur on some particles (suggesting movement)
+- Drop shadows on all text layers (10px blur, 50% opacity)
+- Border: 2px solid cyan with 40% opacity, 20px inner padding
+
+LIGHTING:
+- Main light source from top-center
+- Rim lighting on 3D elements (cyan)
+- Ambient occlusion for depth
+- Specular highlights on metallic surfaces
+
+STYLE REFERENCES:
+- Modern gaming UI (Valorant, Apex Legends menus)
+- Premium software packaging (Adobe, Microsoft)
+- Cyberpunk 2077 interface aesthetics
+- Futuristic HUD displays
+- High-end product cards
+
+MANDATORY RESTRICTIONS:
+❌ NO usernames or account names
+❌ NO UIDs, IDs, or personal identifiers
+❌ NO game screenshots with identifiable info
+❌ NO specific player stats or profiles
+✅ ONLY abstract, professional design elements
+✅ Generic, promotional content only
+
+COLOR PALETTE:
+Primary: Cyan (#00d4ff)
+Secondary: Purple (#8b5cf6)
+Accent: Gold (#ffd700)
+Success: Green (#00ff88)
+Background Dark: (#0a0e27)
+Background Mid: (#1e1b4b)
+Text Primary: White (#ffffff)
+Text Secondary: Light gray (#e0e0e0)
+
+MOOD & ATMOSPHERE:
+- Professional and trustworthy
+- High-tech and cutting-edge
+- Gaming-oriented but sophisticated
+- Premium quality product
+- Excitement and urgency (limited offer)
+- Secure and legitimate
+
+OUTPUT REQUIREMENTS:
+- Resolution: 1080x1080 pixels (300 DPI preferred)
+- Format: PNG with transparency support
+- Color space: sRGB
+- Optimized for social media platforms
+- Print-ready quality if needed
+
+
+════════════════════════════════════════════════════════════
+                    INSTRUÇÕES DE USO
+════════════════════════════════════════════════════════════
+
+1. Acesse o Gemini AI: https://gemini.google.com
+
+2. Comece com a VERSÃO 1 (simples)
+
+3. Se não gostar do resultado, use a VERSÃO 2 (detalhada)
+
+4. Para resultado profissional máximo, use a VERSÃO 3
+
+5. Ajustes após gerar:
+   - Peça para mudar cores: "make it more blue"
+   - Ajuste layout: "make the title bigger"
+   - Mude elementos: "add more glow effects"
+
+6. Variações úteis:
+   - "create 3 variations of this design"
+   - "make it more minimalist"
+   - "add more gaming aesthetic"
+
+════════════════════════════════════════════════════════════

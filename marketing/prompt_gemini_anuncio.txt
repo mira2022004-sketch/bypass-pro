@@ -1,0 +1,85 @@
+========================================
+PROMPT PARA GEMINI AI - IMAGEM DE ANÚNCIO
+========================================
+
+Crie uma imagem profissional para anúncio de software com as seguintes especificações:
+
+ESTILO:
+- Estilo cyberpunk/tecnológico moderno
+- Fundo com gradiente azul escuro para roxo (#1a1a2e → #8b5cf6)
+- Efeitos de brilho neon e partículas digitais
+- Visual gaming profissional
+- Dimensões: 1080x1080 pixels (quadrado para redes sociais)
+
+ELEMENTOS PRINCIPAIS:
+
+1. LOGO/TÍTULO NO TOPO:
+   - Texto "BYPASS PRO" em fonte futurista
+   - Cor: cyan neon brilhante (#00d4ff)
+   - Efeito de brilho/glow ao redor das letras
+   - Ícone de escudo ou firewall ao lado
+
+2. SUBTÍTULO:
+   - "RECONNECT TOOL PRO"
+   - Fonte menor, cor branca com leve brilho
+   - Abaixo do título principal
+
+3. ÍCONES/BADGES (meio da imagem):
+   - Ícone do Steam (logo oficial)
+   - Ícone de firewall/escudo
+   - Ícone de velocidade/raio
+   - Ícone de cadeado/segurança
+   - Dispostos em linha ou círculo
+
+4. LISTA DE BENEFÍCIOS (centro):
+   Texto em branco com checkmarks verdes:
+   ✓ Compatível: Steam, Dota 2, CS:GO
+   ✓ Licença Vitalícia Inclusa
+   ✓ Ativação Automática em 1 Clique
+   ✓ Proteção por Hardware ID
+   ✓ Suporte Técnico Incluso
+
+5. DESTAQUE INFERIOR:
+   - Caixa com fundo semi-transparente
+   - Texto: "🔥 PROMOÇÃO LIMITADA 🔥"
+   - Ou: "💎 LICENÇA ORIGINAL 💎"
+   - Cor dourada ou amarela brilhante
+
+6. ELEMENTOS DECORATIVOS:
+   - Linhas tecnológicas/circuitos no fundo
+   - Partículas/pontos luminosos flutuantes
+   - Bordas com brilho sutil
+   - Efeito de profundidade/3D leve
+
+REGRAS IMPORTANTES:
+❌ NÃO incluir nomes de usuário
+❌ NÃO incluir contas específicas
+❌ NÃO incluir UID ou identificadores
+❌ NÃO incluir screenshots de jogos
+✅ Apenas design abstrato e profissional
+✅ Foco nos benefícios do produto
+✅ Visual limpo e chamativo
+
+MOOD/ATMOSFERA:
+- Profissional e confiável
+- Tecnológico e moderno
+- Gaming/E-sports
+- Seguro e legítimo
+- Premium/High-end
+
+CORES PRINCIPAIS:
+- Fundo: Azul escuro (#0a0e27) a roxo (#1e1b4b)
+- Texto principal: Cyan neon (#00d4ff)
+- Texto secundário: Branco (#ffffff)
+- Destaques: Dourado (#ffd700) ou Verde (#00ff88)
+- Acentos: Roxo vibrante (#8b5cf6)
+
+REFERÊNCIAS DE ESTILO:
+- Interface de software gamer
+- Design de produtos Steam
+- Anúncios de ferramentas premium
+- Estética cyberpunk limpa
+- Cards de produtos digitais
+
+TEXTO ADICIONAL (opcional):
+"Software profissional para gerenciamento de conexão Steam"

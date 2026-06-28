@@ -4,5 +4,9 @@ client/activation.dat
 __pycache__/
 *.pyc
 BypassPro.exe
+KeyManager.exe
 KeyManager/
-
+.vs/
+*.suo
+*.user
+*.log

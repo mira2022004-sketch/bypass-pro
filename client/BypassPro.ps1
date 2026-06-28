@@ -1,7 +1,7 @@
 #Requires -Version 5.0
 
 # ============================================================
-#  BYPASS PRO - Ativação via GitHub
+#  BYPASS PRO V2 - COM VERIFICAÇÃO DE EXPIRAÇÃO EM TEMPO REAL
 # ============================================================
 Import-Module NetSecurity -ErrorAction SilentlyContinue
 $script:GITHUB_TOKEN = "SEU_GITHUB_TOKEN_AQUI"
@@ -70,12 +70,10 @@ function Save-LocalActivation {
 # --- GitHub API ---
 function Get-KeysFromGitHub {
     try {
-        $response = Invoke-RestMethod -Uri $script:API -Headers $script:GITHUB_HEADERS -ErrorAction Stop
+        $response = Invoke-RestMethod -Uri $script:API -Headers $script:GITHUB_HEADERS -TimeoutSec 10 -ErrorAction Stop
         $content = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($response.content))
         return @{ Keys = ($content | ConvertFrom-Json); Sha = $response.sha }
     } catch {
-        Write-Host "ERRO: Nao foi possivel conectar ao servidor de ativacao." -ForegroundColor Red
-        Write-Host "Detalhes: $_" -ForegroundColor DarkRed
         return $null
     }
 }
@@ -89,20 +87,24 @@ function Write-KeyToGitHub {
     if (-not $keys.$KeyId) { return $false }
     if ($keys.$KeyId.hardware) { return $false }
     $keys.$KeyId.hardware = $HardwareId
-    $newContent = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($keys | ConvertTo-Json -Depth 5)))
-    $body = @{ message = "ativacao: $KeyId"; content = $newContent; sha = $sha } | ConvertTo-Json
+    $keys.$KeyId.activated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
+    $newContent = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($keys | ConvertTo-Json -Depth 5 -Compress)))
+    $body = @{ message = "ativacao: $KeyId"; content = $newContent; sha = $sha } | ConvertTo-Json -Compress
     try {
-        Invoke-RestMethod -Uri $script:API -Method Put -Body $body -Headers $script:GITHUB_HEADERS -ErrorAction Stop | Out-Null
+        Invoke-RestMethod -Uri $script:API -Method Put -Body $body -Headers $script:GITHUB_HEADERS -TimeoutSec 10 -ErrorAction Stop | Out-Null
         return $true
     } catch { return $false }
 }
 
-# --- Validação ---
+# --- Validação COMPLETA (usado na ativação inicial) ---
 function Test-KeyRemote {
     param([string]$LicenseKey, [string]$HardwareId)
     Write-Host "Verificando chave..." -ForegroundColor Yellow
     $result = Get-KeysFromGitHub
-    if (-not $result) { return $false }
+    if (-not $result) { 
+        Write-Host "ERRO: Nao foi possivel conectar ao servidor de ativacao." -ForegroundColor Red
+        return $false 
+    }
     $keys = $result.Keys
     if (-not $keys.$LicenseKey) {
         Write-Host "Chave nao encontrada no servidor." -ForegroundColor Red
@@ -133,6 +135,77 @@ function Test-KeyRemote {
         }
     }
     Write-Host "Chave validada com sucesso!" -ForegroundColor Green
+    return $true
+}
+
+# --- Validação RÁPIDA em tempo real (usado a cada uso) ---
+function Test-LicenseStillValid {
+    param([string]$LicenseKey, [string]$HardwareId)
+    
+    $result = Get-KeysFromGitHub
+    if (-not $result) { 
+        return $true
+    }
+    
+    $keys = $result.Keys
+    if (-not $keys.$LicenseKey) {
+        Write-Host "`n========================================" -ForegroundColor Red
+        Write-Host " ERRO: LICENCA INVALIDA!" -ForegroundColor Red
+        Write-Host "========================================" -ForegroundColor Red
+        Write-Host "Sua chave nao existe mais no servidor." -ForegroundColor Yellow
+        Write-Host "Entre em contato com o suporte." -ForegroundColor Yellow
+        Start-Sleep -Seconds 5
+        return $false
+    }
+    
+    $entry = $keys.$LicenseKey
+    
+    if ($entry.revoked -eq $true) {
+        Write-Host "`n========================================" -ForegroundColor Red
+        Write-Host " ERRO: LICENCA REVOGADA!" -ForegroundColor Red
+        Write-Host "========================================" -ForegroundColor Red
+        Write-Host "Sua licenca foi cancelada." -ForegroundColor Yellow
+        Write-Host "Entre em contato com o suporte." -ForegroundColor Yellow
+        Start-Sleep -Seconds 5
+        return $false
+    }
+    
+    try {
+        $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
+        $now = Get-Date
+        
+        if ($now -gt $expires) {
+            Write-Host "`n========================================" -ForegroundColor Red
+            Write-Host " ERRO: LICENCA EXPIRADA!" -ForegroundColor Red
+            Write-Host "========================================" -ForegroundColor Red
+            Write-Host "Sua licenca expirou em: $($expires.ToString('dd/MM/yyyy'))" -ForegroundColor Yellow
+            Write-Host "Renove sua licenca para continuar usando." -ForegroundColor Yellow
+            Write-Host "Entre em contato com o suporte." -ForegroundColor Yellow
+            Start-Sleep -Seconds 5
+            return $false
+        }
+        
+        $daysLeft = ($expires - $now).Days
+        if ($daysLeft -le 7 -and $daysLeft -gt 0) {
+            Write-Host "`nAVISO: Sua licenca expira em $daysLeft dia(s)!" -ForegroundColor Yellow
+            Write-Host "Renove em breve para nao perder acesso." -ForegroundColor Yellow
+            Start-Sleep -Seconds 2
+        }
+    } catch {
+        Write-Host "ERRO: Data de expiracao invalida!" -ForegroundColor Red
+        return $false
+    }
+    
+    if ($entry.hardware -and $entry.hardware -ne $HardwareId) {
+        Write-Host "`n========================================" -ForegroundColor Red
+        Write-Host " ERRO: HARDWARE DIFERENTE!" -ForegroundColor Red
+        Write-Host "========================================" -ForegroundColor Red
+        Write-Host "Esta chave esta vinculada a outro computador." -ForegroundColor Yellow
+        Write-Host "Entre em contato com o suporte para desvincular." -ForegroundColor Yellow
+        Start-Sleep -Seconds 5
+        return $false
+    }
+    
     return $true
 }
 
@@ -169,8 +242,30 @@ function Show-ActivationScreen {
     }
 }
 
-# --- Menu principal ---
+# --- Menu principal COM VERIFICAÇÃO A CADA USO ---
 function Show-MainMenu {
+    $local = Get-LocalActivation
+    if (-not $local) {
+        Write-Host "ERRO: Dados de ativacao corrompidos!" -ForegroundColor Red
+        Write-Host "Reative o programa." -ForegroundColor Yellow
+        Start-Sleep -Seconds 3
+        return $false
+    }
+    
+    $currentHw = Get-HardwareId
+    if ($local.HardwareId -ne $currentHw) {
+        Write-Host "ERRO: Hardware alterado detectado!" -ForegroundColor Red
+        Write-Host "Reative o programa com sua chave." -ForegroundColor Yellow
+        Start-Sleep -Seconds 3
+        return $false
+    }
+    
+    if (-not (Test-LicenseStillValid -LicenseKey $local.Key -HardwareId $currentHw)) {
+        Write-Host "`nPrograma sera encerrado..." -ForegroundColor Red
+        Start-Sleep -Seconds 2
+        return $false
+    }
+    
     $steamPath = Get-SteamPath
     $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
@@ -182,6 +277,21 @@ function Show-MainMenu {
     Write-Host "===================================================" -ForegroundColor White
     Write-Host " Steam: $steamPath" -ForegroundColor Gray
     if (-not $isAdmin) { Write-Host " [!] NAO ESTA COMO ADMIN" -ForegroundColor Red }
+    
+    try {
+        $result = Get-KeysFromGitHub
+        if ($result -and $result.Keys.$($local.Key)) {
+            $entry = $result.Keys.$($local.Key)
+            $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
+            $daysLeft = ($expires - (Get-Date)).Days
+            Write-Host " Licenca: Valida ate $($expires.ToString('dd/MM/yyyy')) ($daysLeft dias)" -ForegroundColor Green
+        } else {
+            Write-Host " Licenca: Ativa (verificacao offline)" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host " Licenca: Ativa (verificacao offline)" -ForegroundColor Yellow
+    }
+    
     Write-Host "===================================================" -ForegroundColor White
     Write-Host ""
 
@@ -211,7 +321,6 @@ function Show-MainMenu {
 function Get-SteamPath {
     $p = "C:\Program Files (x86)\Steam\steam.exe"
     if (Test-Path $p) { return $p }
-    # Se nao achou no padrao, tenta ler do registro
     try {
         $raw = (Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamExe" -ErrorAction Stop).SteamExe
         $raw = $raw.Trim('"', "'").Replace('/', '\')
@@ -225,9 +334,9 @@ function Invoke-Block {
     try {
         Remove-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction SilentlyContinue
         New-NetFirewallRule -DisplayName "$script:RULE_NAME" -Direction Outbound -Action Block -Program "$steamPath" -Enabled True -ErrorAction Stop | Out-Null
-        Write-Host "STEAM BLOQUEADO!" -ForegroundColor Green
+        Write-Host "`nSTEAM BLOQUEADO!" -ForegroundColor Green
     } catch {
-        Write-Host "ERRO:" -ForegroundColor Red -NoNewline
+        Write-Host "`nERRO:" -ForegroundColor Red -NoNewline
         Write-Host " $($_.Exception.Message)" -ForegroundColor White
     }
     Start-Sleep -Seconds 3
@@ -236,49 +345,56 @@ function Invoke-Block {
 function Invoke-Unblock {
     try {
         Remove-NetFirewallRule -DisplayName "$script:RULE_NAME" -ErrorAction Stop
-        Write-Host "STEAM LIBERADO!" -ForegroundColor Green
+        Write-Host "`nSTEAM LIBERADO!" -ForegroundColor Green
     } catch {
-        Write-Host "JA ESTA LIBERADO (nenhuma regra encontrada)." -ForegroundColor Yellow
+        Write-Host "`nJA ESTA LIBERADO (nenhuma regra encontrada)." -ForegroundColor Yellow
     }
     Start-Sleep -Seconds 2
 }
 
 # ===================== MAIN =====================
-# O ps2exe com -requireAdmin já garante execução como admin
-# Não precisa do bloco de restart manual
 
-# Verificar ativação
+Write-Host "Iniciando Bypass Pro..." -ForegroundColor Cyan
+Write-Host "Verificando licenca..." -ForegroundColor Cyan
+Start-Sleep -Seconds 1
+
 $local = Get-LocalActivation
 $needActivation = $true
 
 if ($local) {
     $currentHw = Get-HardwareId
     if ($local.HardwareId -eq $currentHw) {
-        try {
-            $result = Get-KeysFromGitHub
-            if ($result -and $result.Keys.$($local.Key)) {
-                $entry = $result.Keys.$($local.Key)
-                if ($entry.revoked -ne $true) {
-                    $expires = [DateTime]::ParseExact($entry.expires, "yyyy-MM-dd", $null)
-                    if ((Get-Date) -le $expires) {
-                        $needActivation = $false
-                    }
-                }
-            }
-        } catch {}
+        if (Test-LicenseStillValid -LicenseKey $local.Key -HardwareId $currentHw) {
+            $needActivation = $false
+        } else {
+            Write-Host "`nLicenca invalida ou expirada." -ForegroundColor Red
+            Write-Host "Sera necessario reativar." -ForegroundColor Yellow
+            Start-Sleep -Seconds 3
+        }
+    } else {
+        Write-Host "Hardware diferente detectado." -ForegroundColor Yellow
+        Write-Host "Sera necessario reativar." -ForegroundColor Yellow
+        Start-Sleep -Seconds 2
     }
 }
 
 if ($needActivation) {
     for ($i = 0; $i -lt 3; $i++) {
-        if (Show-ActivationScreen) { $needActivation = $false; break }
+        if (Show-ActivationScreen) { 
+            $needActivation = $false
+            break 
+        }
         if ($i -eq 2) {
             Write-Host "Numero maximo de tentativas excedido." -ForegroundColor Red
-            Start-Sleep -Seconds 3; exit
+            Start-Sleep -Seconds 3
+            exit
         }
     }
     if ($needActivation) { exit }
 }
 
-# Loop principal
-while (Show-MainMenu) {}
+while (Show-MainMenu) {
+}
+
+Write-Host "`nEncerrando..." -ForegroundColor Cyan
+Start-Sleep -Seconds 1

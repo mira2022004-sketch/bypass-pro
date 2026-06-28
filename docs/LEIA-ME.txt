@@ -1,0 +1,169 @@
+═══════════════════════════════════════════════════════════════
+  BYPASS PRO - RECONNECT TOOL PROFISSIONAL
+  Versão 2.0 - Sistema Completo
+═══════════════════════════════════════════════════════════════
+
+█ INSTALAÇÃO
+
+  1. Execute BypassPro.exe como Administrador
+     (Clique com botão direito → "Executar como administrador")
+  
+  2. Quando o Windows perguntar, clique em "Sim"
+  
+  3. Digite sua chave de licença no formato:
+     XXXXX-XXXXX-XXXXX-XXXXX
+  
+  4. Aguarde a validação online (alguns segundos)
+  
+  5. Pronto! Agora use o menu:
+     [1] ATIVAR Bloqueio (cair da partida)
+     [2] DESATIVAR Bloqueio (reconectar)
+
+
+█ REQUISITOS
+
+  • Windows 10 ou Windows 11 (64 bits)
+  • Permissões de Administrador
+  • Internet (necessária APENAS na primeira ativação)
+  • Steam instalado
+
+
+█ COMO USAR
+
+  1. Entre em uma partida de Dota 2 / CS:GO
+  2. Abra o BypassPro.exe (como Admin)
+  3. Pressione [1] para BLOQUEAR o Steam
+  4. Você será desconectado da partida
+  5. Pressione [2] para LIBERAR o Steam
+  6. Reconecte normalmente ao jogo
+
+
+█ INFORMAÇÕES DA LICENÇA
+
+  • Sua licença está vinculada a ESTE computador
+  • Funciona em APENAS 1 PC
+  • Após expirar, será necessário renovar
+  • Em caso de formatação, reative com a mesma chave
+
+
+█ TROCAR DE COMPUTADOR
+
+  Se você precisa usar em outro PC:
+  
+  1. Entre em contato com o suporte
+  2. Solicite desvínculo do hardware
+  3. Aguarde a confirmação
+  4. Ative normalmente no novo PC
+
+
+█ RENOVAÇÃO
+
+  Quando sua licença expirar:
+  
+  1. Entre em contato para renovar
+  2. Faça o pagamento da renovação
+  3. Receberá nova chave ou extensão
+  4. Reative o programa
+
+
+█ AVISOS IMPORTANTES
+
+  ⚠ Execute SEMPRE como Administrador
+  ⚠ Não compartilhe sua chave com outras pessoas
+  ⚠ Cada chave funciona em apenas 1 computador
+  ⚠ Após expirar, o programa será bloqueado automaticamente
+
+
+█ PROBLEMAS COMUNS
+
+  ┌─────────────────────────────────────────────────────────┐
+  │ PROBLEMA: "Chave inválida"                              │
+  │ SOLUÇÃO: Verifique se digitou corretamente             │
+  │          Formato: XXXXX-XXXXX-XXXXX-XXXXX              │
+  └─────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────┐
+  │ PROBLEMA: "Chave já ativada em outro computador"        │
+  │ SOLUÇÃO: Entre em contato para desvincular             │
+  └─────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────┐
+  │ PROBLEMA: "Licença expirada"                            │
+  │ SOLUÇÃO: Renove sua licença                            │
+  └─────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────┐
+  │ PROBLEMA: "Não foi possível conectar ao servidor"       │
+  │ SOLUÇÃO: Verifique sua conexão com a internet          │
+  │          Se persistir, use modo offline                │
+  └─────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────┐
+  │ PROBLEMA: "Não está como Admin"                         │
+  │ SOLUÇÃO: Feche e execute como Administrador            │
+  │          Botão direito → Executar como administrador   │
+  └─────────────────────────────────────────────────────────┘
+
+
+█ SEGURANÇA
+
+  ✓ Software 100% seguro
+  ✓ Não modifica arquivos do Steam ou do jogo
+  ✓ Apenas gerencia o Firewall do Windows
+  ✓ Não causa VAC ban
+  ✓ Não acessa dados pessoais
+
+
+█ COMPATIBILIDADE
+
+  Jogos testados e funcionais:
+  
+  • Dota 2
+  • Counter-Strike: Global Offensive (CS:GO)
+  • Counter-Strike 2 (CS2)
+  • Outros jogos Steam (pode funcionar)
+
+
+█ SUPORTE
+
+  Precisa de ajuda?
+  
+  WhatsApp/Telegram: [SEU CONTATO]
+  Email: [SEU EMAIL]
+  
+  Horário de atendimento:
+  Segunda a Sexta: 9h - 22h
+  Sábado: 10h - 18h
+  Domingo: 14h - 20h
+
+
+█ TERMOS DE USO
+
+  • Este software é fornecido "como está"
+  • Não nos responsabilizamos por punições em jogos
+  • Uso por conta e risco do usuário
+  • Proibida a redistribuição sem autorização
+  • 1 licença = 1 computador
+  • Reembolso apenas se não ativar (até 24h)
+
+
+█ VERSÃO
+
+  BypassPro v2.0.0
+  Data: Junho 2026
+  
+  Novidades desta versão:
+  • Verificação de expiração em tempo real
+  • Bloqueio automático de chaves revogadas
+  • Aviso de expiração (7 dias antes)
+  • Interface melhorada
+  • Sistema anti-pirataria
+
+
+═══════════════════════════════════════════════════════════════
+
+  Obrigado por usar o BypassPro!
+  
+  Se gostou, recomende para seus amigos! 😊
+
+═══════════════════════════════════════════════════════════════
