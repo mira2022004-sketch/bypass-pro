@@ -1,10 +1,11 @@
 {
     "GB4DN-LGKGC-G3B82-1R5V7": {
         "created": "2026-06-28",
-        "expires": "",
+        "expires": "2026-07-28",
         "days": 30,
         "hardware": null,
         "revoked": false,
-        "notes": ""
+        "notes": "",
+        "activated_at": "2026-06-28 01:13:57"
     }
 }
