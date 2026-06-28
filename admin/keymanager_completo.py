@@ -6,7 +6,7 @@ Sistema de gerenciamento com todas as funcionalidades
 """
 
 import os, sys, json, base64, hashlib, random, string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 try:
     import requests
@@ -18,7 +18,24 @@ except ImportError:
 # ============================================================
 # CONFIGURAÇÕES
 # ============================================================
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN") or ""
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(SCRIPT_DIR, "config.json")
+
+def load_config():
+    config = {}
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        except: pass
+    return config
+
+def save_config(token):
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump({"GITHUB_TOKEN": token}, f, indent=2)
+
+cfg = load_config()
+GITHUB_TOKEN = cfg.get("GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN") or ""
 GITHUB_OWNER = "mira2022004-sketch"
 GITHUB_REPO = "bypass-pro"
 KEYS_FILE = "keys.json"
@@ -84,7 +101,7 @@ def save_keys(keys, sha):
 def format_date(date_str):
     """Formata data para exibição"""
     try:
-        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         return dt.strftime("%d/%m/%Y")
     except:
         return date_str
@@ -95,8 +112,8 @@ def get_status(key_data):
         return "REVOGADA", "red"
     
     try:
-        exp = datetime.strptime(key_data["expires"], "%Y-%m-%d")
-        now = datetime.utcnow()
+        exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
         
         if exp < now:
             return "EXPIRADA", "red"
@@ -168,9 +185,9 @@ def menu_gerar():
             print("ERRO: Nao foi possivel gerar chave unica")
             continue
         
-        exp = (datetime.utcnow() + timedelta(days=dias)).strftime("%Y-%m-%d")
+        exp = (datetime.now(timezone.utc) + timedelta(days=dias)).strftime("%Y-%m-%d")
         keys[k] = {
-            "created": datetime.utcnow().strftime("%Y-%m-%d"),
+            "created": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
             "expires": exp,
             "days": dias,
             "hardware": None,
@@ -220,7 +237,7 @@ def menu_listar():
     disponiveis = sum(1 for v in keys.values() if not v.get("hardware") and not v.get("revoked"))
     revogadas = sum(1 for v in keys.values() if v.get("revoked"))
     expiradas = sum(1 for v in keys.values() if not v.get("revoked") and 
-                    datetime.strptime(v["expires"], "%Y-%m-%d") < datetime.utcnow())
+                    datetime.strptime(v["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc) < datetime.now(timezone.utc))
     
     print(f"Total: {total} | Ativadas: {ativadas} | Disponiveis: {disponiveis} | Revogadas: {revogadas} | Expiradas: {expiradas}")
     print(f"\n{'='*70}")
@@ -273,8 +290,8 @@ def menu_ativar():
         input("\nPressione Enter...")
         return
     
-    exp = datetime.strptime(key_data["expires"], "%Y-%m-%d")
-    if exp < datetime.utcnow():
+    exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    if exp < datetime.now(timezone.utc):
         print("\nERRO: Esta chave esta expirada!")
         input("\nPressione Enter...")
         return
@@ -287,7 +304,7 @@ def menu_ativar():
     
     # Ativar
     keys[chave]["hardware"] = hardware_id
-    keys[chave]["activated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    keys[chave]["activated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     
     if save_keys(keys, sha):
         print(f"\n{'='*70}")
@@ -380,7 +397,7 @@ def menu_revogar():
     motivo = input("Motivo da revogacao (opcional): ").strip()
     
     keys[chave]["revoked"] = True
-    keys[chave]["revoked_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    keys[chave]["revoked_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     if motivo:
         keys[chave]["revoked_reason"] = motivo
     
@@ -423,7 +440,7 @@ def menu_reativar():
         return
     
     keys[chave]["revoked"] = False
-    keys[chave]["reactivated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    keys[chave]["reactivated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     
     if save_keys(keys, sha):
         print(f"\n✓ Chave '{chave}' reativada com sucesso!")
@@ -466,10 +483,10 @@ def menu_estender():
         input("\nPressione Enter...")
         return
     
-    exp = datetime.strptime(key_data["expires"], "%Y-%m-%d") + timedelta(days=dias)
+    exp = datetime.strptime(key_data["expires"], "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=dias)
     keys[chave]["expires"] = exp.strftime("%Y-%m-%d")
     keys[chave]["days"] = key_data.get("days", 0) + dias
-    keys[chave]["extended_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    keys[chave]["extended_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     
     if save_keys(keys, sha):
         print(f"\n✓ Chave estendida ate {format_date(keys[chave]['expires'])}!")
@@ -515,7 +532,7 @@ def menu_desvincular():
         return
     
     keys[chave]["hardware"] = None
-    keys[chave]["unlinked_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    keys[chave]["unlinked_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     keys[chave]["unlinked_from"] = old_hw
     
     if save_keys(keys, sha):
@@ -598,10 +615,8 @@ def menu_config():
     if novo:
         GITHUB_TOKEN = novo
         HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
-        print("\n✓ Token atualizado!")
-        print("\nPara salvar permanentemente:")
-        print(f"  Windows: set GITHUB_TOKEN={novo}")
-        print(f"  Linux/Mac: export GITHUB_TOKEN={novo}")
+        save_config(novo)
+        print("\n✓ Token atualizado e salvo em config.json!")
     else:
         print("\nToken nao alterado.")
     
@@ -686,10 +701,8 @@ def main():
         if novo:
             GITHUB_TOKEN = novo
             HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
-            print("\n✓ Token configurado!")
-            print("\nPara salvar permanentemente:")
-            print(f"  Windows: set GITHUB_TOKEN={novo}")
-            print(f"  Linux/Mac: export GITHUB_TOKEN={novo}")
+            save_config(novo)
+            print("\n✓ Token configurado e salvo em config.json!")
             input("\nPressione Enter para continuar...")
         else:
             print("\nToken necessario para usar o sistema. Saindo...")

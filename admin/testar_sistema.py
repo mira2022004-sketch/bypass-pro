@@ -8,6 +8,9 @@ import os
 import sys
 import json
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(SCRIPT_DIR)
+
 print("=" * 70)
 print("  TESTE DO SISTEMA BYPASS PRO")
 print("=" * 70)
@@ -106,9 +109,9 @@ print()
 # Teste 6: Verificar arquivos
 print("[6] Verificando arquivos do projeto...")
 arquivos = [
-    ("keymanager_completo.py", "Gerenciador completo"),
-    ("client/BypassPro.ps1", "Cliente PowerShell"),
-    ("server/index.js", "Servidor Node.js"),
+    (os.path.join(SCRIPT_DIR, "keymanager_completo.py"), "Gerenciador completo"),
+    (os.path.join(ROOT, "client", "BypassPro.ps1"), "Cliente PowerShell"),
+    (os.path.join(ROOT, "server", "index.js"), "Servidor Node.js"),
 ]
 
 for arquivo, descricao in arquivos:

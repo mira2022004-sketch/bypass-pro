@@ -1,6 +1,7 @@
 server/node_modules/
 server/keys.db
 client/activation.dat
+admin/config.json
 __pycache__/
 *.pyc
 BypassPro.exe
