@@ -323,28 +323,16 @@ def menu_ativar():
 # MENU 4: APAGAR CHAVE
 # ============================================================
 
-def menu_apagar():
-    """Apaga uma chave permanentemente"""
-    clear_screen()
-    print_header()
-    print("\n>>> APAGAR CHAVE PERMANENTEMENTE <<<\n")
-    print("⚠️  CUIDADO: Esta acao NAO PODE SER DESFEITA!\n")
-    
+def menu_apagar_uma(keys, sha):
+    """Apaga uma chave específica"""
     chave = input("Digite a chave a apagar: ").strip().upper()
     if not chave:
-        return
-    
-    keys, sha = get_keys()
-    if keys is None:
-        input("\nErro ao conectar. Pressione Enter...")
-        return
+        return False
     
     if chave not in keys:
         print(f"\nChave '{chave}' nao encontrada!")
-        input("\nPressione Enter...")
-        return
+        return False
     
-    # Mostrar informações da chave
     key_data = keys[chave]
     print(f"\nInformacoes da chave:")
     print(f"  Criada em: {format_date(key_data['created'])}")
@@ -358,12 +346,120 @@ def menu_apagar():
         del keys[chave]
         if save_keys(keys, sha):
             print(f"\n✓ Chave '{chave}' apagada com sucesso!")
+            return True
         else:
             print("\nErro ao salvar!")
     else:
         print("\nOperacao cancelada.")
+    return False
+
+def menu_apagar_todas(keys, sha):
+    """Apaga todas as chaves"""
+    total = len(keys)
+    if total == 0:
+        print("\nNenhuma chave para apagar.")
+        return
     
-    input("\nPressione Enter...")
+    print(f"\nTotal de chaves: {total}")
+    print("⚠️  ISSO VAI APAGAR TODAS AS CHAVES PERMANENTEMENTE!")
+    confirma = input("\nDigite 'APAGAR TUDO' para confirmar: ").strip().upper()
+    
+    if confirma == "APAGAR TUDO":
+        if save_keys({}, sha):
+            print(f"\n✓ Todas as {total} chave(s) foram apagadas com sucesso!")
+        else:
+            print("\nErro ao salvar!")
+    else:
+        print("\nOperacao cancelada.")
+
+def menu_apagar_lista(keys, sha):
+    """Lista chaves e permite selecionar quais apagar"""
+    if not keys:
+        print("\nNenhuma chave encontrada.")
+        return
+    
+    lista = sorted(keys.keys(), key=lambda k: keys[k]["created"], reverse=True)
+    
+    print(f"\n{'Nº':<4} {'CHAVE':<25} {'EXPIRA':<12} {'STATUS':<12}")
+    print(f"{'='*60}")
+    for i, k in enumerate(lista, 1):
+        status = get_status(keys[k])[0]
+        exp = format_date(keys[k]["expires"])
+        print(f"{i:<4} {k:<25} {exp:<12} {status:<12}")
+    
+    escolha = input(f"\nNumeros das chaves para apagar (ex: 1,3,5-8): ").strip()
+    if not escolha:
+        return
+    
+    indices = set()
+    for parte in escolha.split(","):
+        parte = parte.strip()
+        if "-" in parte:
+            try:
+                a, b = parte.split("-")
+                indices.update(range(int(a), int(b) + 1))
+            except: pass
+        else:
+            try: indices.add(int(parte))
+            except: pass
+    
+    apagar = []
+    for idx in sorted(indices):
+        if 1 <= idx <= len(lista):
+            apagar.append(lista[idx - 1])
+    
+    if not apagar:
+        print("Nenhuma chave valida selecionada.")
+        input("\nPressione Enter...")
+        return
+    
+    print(f"\nChaves selecionadas para apagar ({len(apagar)}):")
+    for k in apagar:
+        print(f"  - {k}")
+    
+    confirma = input(f"\nConfirmar exclusao? (digite SIM): ").strip().upper()
+    if confirma == "SIM":
+        for k in apagar:
+            del keys[k]
+        if save_keys(keys, sha):
+            print(f"\n✓ {len(apagar)} chave(s) apagada(s) com sucesso!")
+        else:
+            print("\nErro ao salvar!")
+    else:
+        print("\nOperacao cancelada.")
+
+def menu_apagar():
+    """Apaga chave(s) permanentemente"""
+    while True:
+        clear_screen()
+        print_header()
+        print("\n>>> APAGAR CHAVE(S) <<<\n")
+        print("  [1] Apagar uma chave especifica")
+        print("  [2] Apagar TODAS as chaves")
+        print("  [3] Listar e selecionar chaves para apagar")
+        print("  [0] Voltar")
+        print(f"\n{'='*70}")
+        
+        op = input("Escolha: ").strip()
+        
+        keys, sha = get_keys()
+        if keys is None:
+            input("\nErro ao conectar. Pressione Enter...")
+            continue
+        
+        if op == "1":
+            menu_apagar_uma(keys, sha)
+        elif op == "2":
+            menu_apagar_todas(keys, sha)
+        elif op == "3":
+            menu_apagar_lista(keys, sha)
+        elif op == "0":
+            break
+        else:
+            print("Opcao invalida!")
+        
+        if op in ("1", "2", "3"):
+            input("\nPressione Enter...")
 
 # ============================================================
 # MENU 5: REVOGAR CHAVE
@@ -635,7 +731,7 @@ def main_menu():
         print("  [1]  Gerar chaves")
         print("  [2]  Listar todas as chaves")
         print("  [3]  Ativar chave (vincular hardware)")
-        print("  [4]  Apagar chave permanentemente")
+        print("  [4]  Apagar chave(s) [1 especifica | 2 todas | 3 selecionar]")
         print("  [5]  Revogar chave (bloquear)")
         print("  [6]  Reativar chave revogada")
         print("  [7]  Estender validade")
