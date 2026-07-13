@@ -1,1 +1,26 @@
-{}
+{
+    "KUV7P-FML21-W1735-4NG46": {
+        "created": "2026-07-13",
+        "expires": "",
+        "days": 30,
+        "hardware": null,
+        "revoked": false,
+        "notes": ""
+    },
+    "HBBB7-BOW7O-ZOEL0-IUD9B": {
+        "created": "2026-07-13",
+        "expires": "",
+        "days": 30,
+        "hardware": null,
+        "revoked": false,
+        "notes": ""
+    },
+    "DXGMH-E8K7R-5DOB7-XX8SM": {
+        "created": "2026-07-13",
+        "expires": "",
+        "days": 30,
+        "hardware": null,
+        "revoked": false,
+        "notes": ""
+    }
+}
