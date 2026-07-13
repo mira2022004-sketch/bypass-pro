@@ -1,11 +1,12 @@
 {
     "KUV7P-FML21-W1735-4NG46": {
         "created": "2026-07-13",
-        "expires": "",
+        "expires": "2026-08-12",
         "days": 30,
         "hardware": null,
         "revoked": false,
-        "notes": ""
+        "notes": "",
+        "activated_at": "2026-07-13 22:53:38"
     },
     "HBBB7-BOW7O-ZOEL0-IUD9B": {
         "created": "2026-07-13",
