@@ -9,11 +9,12 @@
     },
     "HBBB7-BOW7O-ZOEL0-IUD9B": {
         "created": "2026-07-13",
-        "expires": "",
+        "expires": "2026-08-12",
         "days": 30,
         "hardware": null,
         "revoked": false,
-        "notes": ""
+        "notes": "",
+        "activated_at": "2026-07-13 22:53:24"
     },
     "DXGMH-E8K7R-5DOB7-XX8SM": {
         "created": "2026-07-13",
