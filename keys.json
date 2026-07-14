@@ -28,10 +28,11 @@
     },
     "GJ8VR-P4WO8-IFLN3-RLQ3H": {
         "created": "2026-07-14",
-        "expires": "",
+        "expires": "2026-07-16",
         "days": 2,
         "hardware": null,
         "revoked": false,
-        "notes": ""
+        "notes": "",
+        "activated_at": "2026-07-14 18:40:17"
     }
 }
