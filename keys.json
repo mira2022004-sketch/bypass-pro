@@ -7,5 +7,13 @@
         "revoked": false,
         "notes": "",
         "activated_at": "2026-07-14 05:19:32"
+    },
+    "ZCASO-NHAXJ-H0KLT-AYQXP": {
+        "created": "2026-07-22",
+        "expires": "",
+        "days": 30,
+        "hardware": null,
+        "revoked": false,
+        "notes": ""
     }
 }
