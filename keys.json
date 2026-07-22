@@ -10,10 +10,11 @@
     },
     "ZCASO-NHAXJ-H0KLT-AYQXP": {
         "created": "2026-07-22",
-        "expires": "",
+        "expires": "2026-08-21",
         "days": 30,
         "hardware": null,
         "revoked": false,
-        "notes": ""
+        "notes": "",
+        "activated_at": "2026-07-22 15:06:32"
     }
 }
