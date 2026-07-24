@@ -19,10 +19,11 @@
     },
     "OJKI9-O8PVR-LVWO5-89S3P": {
         "created": "2026-07-24",
-        "expires": "",
+        "expires": "2026-10-22",
         "days": 90,
         "hardware": null,
         "revoked": false,
-        "notes": ""
+        "notes": "",
+        "activated_at": "2026-07-24 00:00:30"
     }
 }
